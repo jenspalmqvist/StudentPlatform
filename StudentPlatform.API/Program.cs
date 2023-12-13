@@ -12,10 +12,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.ConfigureHttpJsonOptions(options => {
     options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
-builder.Services.AddDbContext<Context>(
-    options =>
-    options.UseSqlServer("Server=localhost;Database=StudentPlatform;Trusted_Connection=True;Trust Server Certificate=Yes")
-);
+builder.Services.AddDbContext<Context>();
 
 var app = builder.Build();
 
@@ -30,31 +27,27 @@ app.UseHttpsRedirection();
 
 
 
-app.MapGet("/student", () =>
+app.MapGet("/student", (Context context) =>
 {
-    using(Context context = new Context()){
-        return context.Students.Include("Courses").ToList();
-    }
+    context.Students.Include("Courses").ToList();
 }
 );
 
-app.MapPost("/student", (string name) =>
+app.MapPost("/student", (Context context, string name) =>
 {
-    using (Context context = new Context()){
         Student student = new Student(name);
         Course course = context.Courses.First();
         student.Courses.Add(course);
         context.Students.Add(student);
         context.SaveChanges();
-    }
 });
 
-app.MapPost("/course", (string name) =>
+app.MapPost("/course", (Context context, string name) =>
 {
-    using (Context context = new Context()){
+    
         context.Courses.Add(new Course(name));
         context.SaveChanges();
-    }
+
 });
 app.Run();
 

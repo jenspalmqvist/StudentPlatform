@@ -12,23 +12,17 @@ namespace StudentPlatform.API.Data
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Course> Courses { get; set; }
 
+        public string DbPath {get;}
+
+        // The following configures EF to create a Sqlite database file in the
+        // special "local" folder for your platform.
         public Context(DbContextOptions<Context> options) : base(options) {
+            var folder = Environment.SpecialFolder.LocalApplicationData;
+            var path = Environment.GetFolderPath(folder);
+            DbPath = Path.Combine(path, "studentplatform.db");
+        }      
 
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer("Server=localhost;Database=StudentPlatform;Trusted_Connection=True;Trust Server Certificate=Yes");
-        }
-        DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
-
-        public Context()
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer("Server=localhost;Database=StudentPlatform;Trusted_Connection=True;Trust Server Certificate=Yes");
-            }
-        }
-        
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        => options.UseSqlite($"Data Source={DbPath}"); 
     }
 }
